@@ -1,13 +1,15 @@
 import functools
 import typing
 
-from sorters import BaseSorter, IntegerSorter
+from sorters import BaseSorter
+from errors import EqualValuesException, InvalidTypeException, RootNodeDeleteException
 
 
 class BinarySearchTreeNode:
     """
     This is a Binary search tree node, which has left and right child nodes of same class
     """
+
     def __init__(
         self,
         sorter: typing.Type[BaseSorter],
@@ -18,8 +20,8 @@ class BinarySearchTreeNode:
         self.node_value = node_value
         self.level = level
 
-    _left_node = None
-    _right_node = None
+    _left_node: "BinarySearchTreeNode" = None
+    _right_node: "BinarySearchTreeNode" = None
 
     @property
     def is_root(self) -> bool:
@@ -49,10 +51,12 @@ class BinarySearchTreeNode:
     @functools.cached_property
     def deepest_nodes(self) -> tuple[int, list]:
         """Returns a tuple with 2 items:
-            int:            depth of whole tree
-            [values...]     deepest nodes values
+        int:            depth of whole tree
+        [values...]     deepest nodes values
         """
-        return self.depth, [i.node_value for i in self.leaf_nodes if i.level == self.depth]
+        return self.depth, [
+            i.node_value for i in self.leaf_nodes if i.level == self.depth
+        ]
 
     @functools.cached_property
     def min_value(self):
@@ -68,65 +72,103 @@ class BinarySearchTreeNode:
             return self._right_node.max_value
         return self.node_value
 
+    def get_ordered_values(self, reverse: bool = False) -> list[typing.Any]:
+        """Get all values in a given order"""
+        result = []
+
+        side_order = ["_left_node", "_right_node"]
+        if reverse:
+            side_order.reverse()
+
+        first_side_node = getattr(self, side_order[0], None)
+        if first_side_node is not None:
+            result += first_side_node.get_ordered_values(reverse=reverse)
+
+        result.append(self.node_value)
+
+        second_side_node = getattr(self, side_order[1], None)
+        if second_side_node is not None:
+            result += second_side_node.get_ordered_values(reverse=reverse)
+
+        return result
+
     def cache_clear(self):
         """
-        Multiple properties on this class has cache (memoization) assigned to,
-        so we have to clear / invalidate cache to force tree re-calculate cached keys.
+        Multiple properties on this class has cache (memoization), so we have to
+        clear / invalidate cache to force tree re-calculate cached keys in order to show new info.
         """
-        for attr in dir(type(self)):
-            if isinstance(getattr(type(self), attr), functools.cached_property):
-                vars(self).pop(attr, None)
+        for attr in dir(type(self)):  # <- for every node attribute
+            if isinstance(
+                getattr(type(self), attr), functools.cached_property
+            ):  # <- check if is a cached_property
+                vars(self).pop(attr, None)  # <- Then delete the actual value
 
-    def add(self, value):
-        """Add single value"""
-
+    def add(self, value: typing.Any):
+        """
+        Add single value, it will be validated by sorter adapter at compare step.
+        """
         try:
-            if self.sorter.is_lower_than(value, self.node_value):
-                destination_side = '_left_node'
-            else:
-                destination_side = '_right_node'
+            # Get the side destination for this value
+            side = (
+                "_left_node"
+                if self.sorter.is_lower_than(value, self.node_value)
+                else "_right_node"
+            )
+            side_node = getattr(self, side, None)
 
-            side_node = getattr(self, destination_side, None)
             if side_node is not None:
-                side_node.add(value)
+                side_node.add(
+                    value
+                )  # <- We already have a node on the side, so we call it's own add method
             else:
+                # In case we dont have a node, we create one with new value
                 created_node = BinarySearchTreeNode(
                     sorter=self.sorter,
                     node_value=value,
                     level=self.level + 1,
                 )
-                setattr(self, destination_side, created_node)
+                setattr(self, side, created_node)  # <- put the node in a side of parent
 
             self.cache_clear()
 
-        except ValueError:
+        except EqualValuesException:
             # We do nothing for now
             return
 
+    def remove(self, value: typing.Any):
+        """
+        Delete the node that match a certain value
+        """
+        if (
+            value == self.node_value
+        ):  # <- The root node is the only one we cannot delete
+            if self.is_root:
+                raise RootNodeDeleteException("Cannot remove root node.")
+
+        side = (
+            "_left_node"
+            if self.sorter.is_lower_than(value, self.node_value)
+            else "_right_node"
+        )
+        side_node = getattr(self, side, None)
+
+        if side_node is not None:
+            if side_node.node_value == value:
+                setattr(self, side, None)
+                self.cache_clear()
+                return True
+
+            side_node.remove(value)
+        return False
+
     def add_multiple(self, values: typing.Iterable):
-        """Add multiple values from this node"""
+        """
+        Add multiple values from this node
+        """
         if not isinstance(values, typing.Iterable):
-            raise TypeError('Method add_multiple accepts iterable data only for input.')
+            raise InvalidTypeException(
+                "Method add_multiple accepts iterable data only for input."
+            )
 
         for _value in set(values):
             self.add(_value)
-
-
-def make_binary_search_tree(
-    sorter: typing.Type[BaseSorter],
-    values: list[typing.Any],
-) -> BinarySearchTreeNode:
-    """Build a BinarySearchTree instance from given values arguments"""
-    root_node = BinarySearchTreeNode(sorter=sorter, node_value=values[0])
-    root_node.add_multiple(values[1:])
-    return root_node
-
-
-integer_bst = make_binary_search_tree(sorter=IntegerSorter, values=[12])
-integer_bst.add(4)
-integer_bst.add(9)
-integer_bst.add_multiple([5, 6, 7, 7, 19])
-
-print(integer_bst)
-
-pass

@@ -6,6 +6,8 @@ binary search trees.
 """
 import typing
 
+from errors import InvalidCharLenException, InvalidTypeException, EqualValuesException
+
 
 class BaseSorter:
     """
@@ -22,11 +24,11 @@ class BaseSorter:
         """
         # Check if values are allowed type
         if not isinstance(a, cls.allowed_type) or not isinstance(b, cls.allowed_type):
-            raise TypeError(f'We allow {cls.allowed_type} value types only.')
+            raise InvalidTypeException(f"We allow {cls.allowed_type} value types only.")
 
         # If we have the same value, the comparator will not work properly
         if a == b:
-            raise ValueError(f'Both values are equal.')
+            raise EqualValuesException(f"Both values are equal.")
 
     @classmethod
     def is_lower_than(cls, a, b) -> bool:
@@ -43,3 +45,27 @@ class IntegerSorter(BaseSorter):
 
 class FloatSorter(BaseSorter):
     allowed_type = float
+
+
+class CharSorter(BaseSorter):
+    """
+    Note that this sorter requires some extra behavior to compare / validate values
+    """
+
+    allowed_type = str
+
+    @classmethod
+    def validate_values(cls, a: str, b: str):
+        super().validate_values(a, b)
+        # Validate it's a char (string of length 1)
+        if len(a) > 1 or len(b) > 1:
+            raise InvalidCharLenException("We only accept string of length 1.")
+
+    @classmethod
+    def is_lower_than(cls, a: str, b: str) -> bool:
+        """Special handling for chars, we have to do some extra work"""
+        _a = a.lower()
+        _b = a.lower()
+        cls.validate_values(_a, _b)
+        # In this case, we compare both by getting the unicode number of the char
+        return ord(_a) < ord(_b)
