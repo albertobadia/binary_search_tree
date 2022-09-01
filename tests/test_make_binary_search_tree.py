@@ -1,6 +1,7 @@
 import decimal
 import unittest
 
+from binary_search_tree import BinarySearchTreeNode
 from errors import MultipleDataTypesException, TypeSorterNotFoundException
 from make_bst import make_binary_search_tree
 from sorters import CharSorter
@@ -11,6 +12,13 @@ class MakeBinarySearchTreeTestCase(unittest.TestCase):
     We use make_binary_search_tree function to get correct sorter for values type,
     validate that all are the same type, create root node, and propagate values addition.
     """
+
+    def test_return_binary_search_tree_node_with_is_root_true(self):
+        """
+        Because we can just forgot what the function should return.
+        """
+        float_bst = make_binary_search_tree(values=[0.5, 0.9, 0.6, 0.8])
+        self.assertTrue(isinstance(float_bst, BinarySearchTreeNode))
 
     def test_multiple_data_types_exception(self):
         """

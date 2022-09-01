@@ -139,27 +139,30 @@ class BinarySearchTreeNode:
         """
         Delete the node that match a certain value
         """
-        if (
-            value == self.node_value
-        ):  # <- The root node is the only one we cannot delete
-            if self.is_root:
-                raise RootNodeDeleteException("Cannot remove root node.")
+        try:
+            if (
+                value == self.node_value
+            ):  # <- The root node is the only one we cannot delete
+                if self.is_root:
+                    raise RootNodeDeleteException("Cannot remove root node.")
 
-        side = (
-            "_left_node"
-            if self.sorter.is_lower_than(value, self.node_value)
-            else "_right_node"
-        )
-        side_node = getattr(self, side, None)
+            side = (
+                "_left_node"
+                if self.sorter.is_lower_than(value, self.node_value)
+                else "_right_node"
+            )
+            side_node = getattr(self, side, None)
 
-        if side_node is not None:
-            if side_node.node_value == value:
-                setattr(self, side, None)
-                self.cache_clear()
-                return True
+            if side_node is not None:
+                if side_node.node_value == value:
+                    setattr(self, side, None)
+                    return True
 
-            side_node.remove(value)
-        return False
+                side_node.remove(value)
+            return False
+
+        finally:
+            self.cache_clear()
 
     def add_multiple(self, values: typing.Iterable):
         """
