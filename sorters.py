@@ -64,8 +64,13 @@ class CharSorter(BaseSorter):
     @classmethod
     def is_lower_than(cls, a: str, b: str) -> bool:
         """Special handling for chars, we have to do some extra work"""
-        _a = a.lower()
-        _b = a.lower()
+        try:  # <- we do this extra validation here to be sure equal chars match
+            _a = a.lower()
+            _b = b.lower()
+        except AttributeError:
+            # Re launch correct exception when found other type
+            raise InvalidTypeException("We only accept chars here.")
+
         cls.validate_values(_a, _b)
         # In this case, we compare both by getting the unicode number of the char
         return ord(_a) < ord(_b)

@@ -170,5 +170,5 @@ class BinarySearchTreeNode:
                 "Method add_multiple accepts iterable data only for input."
             )
 
-        for _value in set(values):
+        for _value in values:
             self.add(_value)

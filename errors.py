@@ -21,3 +21,7 @@ class MultipleDataTypesException(Exception):
 
 class RootNodeDeleteException(Exception):
     pass
+
+
+class TypeSorterNotFoundException(Exception):
+    pass
