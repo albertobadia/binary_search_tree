@@ -1,7 +1,7 @@
 import typing
 
 from binary_search_tree import BinarySearchTreeNode
-from errors import MultipleDataTypesException, TypeSorterNotFoundException
+from errors import MultipleDataTypesException, TypeSorterNotFoundException, InvalidTypeException
 from sorters import BaseSorter, IntegerSorter, CharSorter, FloatSorter
 
 
@@ -18,17 +18,17 @@ def get_sorter_for_type(_type: typing.Type) -> typing.Type[BaseSorter]:
 def make_binary_search_tree(values: list[typing.Any]) -> BinarySearchTreeNode:
     """Build a BinarySearchTree instance from given values arguments"""
 
-    data_type = set([type(i) for i in values])
-    if len(data_type) > 1:  # <- Validate that we receive all values same type
-        raise MultipleDataTypesException("We receive different type values")
-    data_type = data_type.pop()
+    try:
+        data_type = type(values[0])
+        sorter = get_sorter_for_type(data_type)
+        if sorter is None:
+            raise TypeSorterNotFoundException(f"Sorter for type {data_type}.")
 
-    sorter = get_sorter_for_type(data_type)  # <- get the sorter for that type
-    if sorter is None:
-        raise TypeSorterNotFoundException(f"Sorter for type {data_type}.")
+        root_node = BinarySearchTreeNode(sorter=sorter, node_value=values[0])
+        if len(values) > 1:
+            root_node.add_multiple(values[1:])
 
-    root_node = BinarySearchTreeNode(sorter=sorter, node_value=values[0])
-    if len(values) > 1:
-        root_node.add_multiple(values[1:])
+        return root_node
 
-    return root_node
+    except InvalidTypeException:
+        raise MultipleDataTypesException('We receive different data types on input.')

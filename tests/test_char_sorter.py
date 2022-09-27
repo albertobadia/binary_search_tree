@@ -7,9 +7,7 @@ class CharSorterTestCase(BaseSorterTestCase.TestCase):
     """
     Tests collection for CharSorterUseCases
     """
-
     sorter = CharSorter
-    allowed_type = str
     correct_value_lower = "a"
     correct_value_bigger = "x"
     incorrect_value = 1

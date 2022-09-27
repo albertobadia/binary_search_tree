@@ -5,6 +5,7 @@ from sorters import FloatSorter, CharSorter, IntegerSorter
 integer_bst = make_binary_search_tree(values=[12, 11, 90, 82, 7, 9])
 assert integer_bst.sorter == IntegerSorter  # <- validate sorter
 assert integer_bst.get_ordered_values() == [7, 9, 11, 12, 82, 90]
+assert integer_bst.deepest_nodes == (3, [9])
 
 #########################################################################
 

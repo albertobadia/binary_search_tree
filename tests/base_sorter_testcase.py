@@ -1,4 +1,3 @@
-import typing
 import unittest
 
 from errors import InvalidTypeException, EqualValuesException
@@ -15,16 +14,16 @@ class BaseSorterTestCase:
         Common tests collection for sorters use cases
         """
 
-        sorter = BaseSorter  # <- Sorter that we are testing
-        allowed_type = typing.Type  # <- Type that the test should check for
-        correct_value_lower = 1  # <- An example of a correct value
-        correct_value_bigger = 2  # <- An example of bigger correct value
-        incorrect_value = "a"  # <- An example of an incorrect value
+        sorter = BaseSorter         # <- Sorter that we are testing
+        correct_value_lower = 1     # <- An example of a correct value
+        correct_value_bigger = 2    # <- An example of bigger correct value
+        incorrect_value = "a"       # <- An example of an incorrect value
 
         def test_invalid_type_exception(self):
             """
-            Every sorter has an property called 'allowed_type', received values should be the same type.
-            In case not, we raise InvalidTypeException error, other controllers depends from that approach to run well.
+            Every sorter has a property called 'allowed_type', received values should be the same type.
+            In case not, we raise InvalidTypeException error, other controllers depends on that approach
+            to run well.
             """
 
             with self.assertRaises(InvalidTypeException):
