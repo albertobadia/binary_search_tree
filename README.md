@@ -1,9 +1,4 @@
-# Slingr Challenge
-
-## The task: build a binary search tree and its methods
-
-### Note: I just wanted to give some extra effort, and propose a way to manage different data types.
-
+# Binary seach tree example
 
 ![Alt text](bst_diagram.jpg?raw=true "Title")
 
