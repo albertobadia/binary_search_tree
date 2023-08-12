@@ -1,7 +1,5 @@
 # Binary seach tree example
 
-![Alt text](bst_diagram.jpg?raw=true "Title")
-
 ## Usage examples:
 
 ``` Python
